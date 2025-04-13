@@ -18,8 +18,8 @@ User = get_user_model()
 class FlexiblePagination(LimitOffsetPagination):
     def paginate_queryset(self, queryset, request, view=None):
         if (
-            'limit' not in request.query_params and
-            'offset' not in request.query_params
+            'limit' not in request.query_params
+            and 'offset' not in request.query_params
         ):
             return None  # Отключаем пагинацию, если нет параметров
         return super().paginate_queryset(queryset, request, view)
