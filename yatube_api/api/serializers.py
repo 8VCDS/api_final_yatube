@@ -4,15 +4,17 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
     )
-    
+
     class Meta:
         model = Post
         fields = '__all__'
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -29,10 +31,12 @@ class CommentSerializer(serializers.ModelSerializer):
         }
         read_only_fields = ('author', 'post')
 
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
+
 
 class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
@@ -44,7 +48,7 @@ class FollowSerializer(serializers.ModelSerializer):
         slug_field='username',
         queryset=User.objects.all()
     )
-    
+
     class Meta:
         model = Follow
         fields = '__all__'
@@ -55,7 +59,7 @@ class FollowSerializer(serializers.ModelSerializer):
                 message='Вы уже подписаны на этого пользователя.'
             )
         ]
-    
+
     def validate(self, data):
         if data['user'] == data['following']:
             raise serializers.ValidationError(

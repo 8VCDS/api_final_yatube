@@ -3,7 +3,12 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from posts.models import Post, Comment, Follow, Group
-from .serializers import FollowSerializer, PostSerializer, CommentSerializer, GroupSerializer
+from .serializers import (
+    FollowSerializer,
+    PostSerializer,
+    CommentSerializer,
+    GroupSerializer
+)
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
 
@@ -12,13 +17,16 @@ User = get_user_model()
 
 class FlexiblePagination(LimitOffsetPagination):
     def paginate_queryset(self, queryset, request, view=None):
-        if 'limit' not in request.query_params and 'offset' not in request.query_params:
+        if (
+            'limit' not in request.query_params and
+            'offset' not in request.query_params
+        ):
             return None  # Отключаем пагинацию, если нет параметров
         return super().paginate_queryset(queryset, request, view)
 
     def get_paginated_response(self, data):
         if self.limit is None and self.offset is None:
-            return Response(data)  # Возвращаем просто список, если пагинация отключена
+            return Response(data)
         return super().get_paginated_response(data)
 
 
@@ -54,7 +62,7 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != request.user:
@@ -63,7 +71,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().update(request, *args, **kwargs)
-    
+
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != request.user:
@@ -72,6 +80,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().partial_update(request, *args, **kwargs)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -95,10 +104,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.AllowAny]
+
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
@@ -121,7 +132,10 @@ class FollowViewSet(viewsets.ModelViewSet):
                 {'detail': 'Вы не можете подписаться на самого себя.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if Follow.objects.filter(user=request.user, following=following).exists():
+        if Follow.objects.filter(
+            user=request.user,
+            following=following
+        ).exists():
             return Response(
                 {'detail': 'Вы уже подписаны на этого пользователя.'},
                 status=status.HTTP_400_BAD_REQUEST
